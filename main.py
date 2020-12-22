@@ -140,6 +140,8 @@ if __name__ == '__main__':
 
     target_brightness = total_brightness(src_img)
 
+    total_dist = 0
+
     src_draw = ImageDraw.Draw(src_img)
     out_draw = ImageDraw.Draw(out_img)
     with open(opts['output'], 'w') as f:
@@ -147,7 +149,7 @@ if __name__ == '__main__':
         prev_pin = curr_pin
         curr_b = 255*3
         i = 0
-        while curr_pin != None and TOLLERANCE * curr_b > target_brightness:
+        while curr_pin != None and TOLLERANCE * curr_b > target_brightness and total_dist < 1200 * 500:
             times_used[curr_pin] += 1
             src_draw.line(pins[prev_pin] + pins[curr_pin],
                           fill=(255, 255, 255))
@@ -155,6 +157,7 @@ if __name__ == '__main__':
             taken.add((prev_pin, curr_pin))
             taken.add((curr_pin, prev_pin))
             curr_b = total_brightness(out_img)
+            total_dist += dist(pins[prev_pin], pins[curr_pin])
             print(i, '{:.0f} / {:.0f} = {:.3f}, target {:.3f}'.format(
                 target_brightness, curr_b, target_brightness / curr_b, TOLLERANCE))
             i += 1
@@ -164,6 +167,7 @@ if __name__ == '__main__':
 
     #print(list(reduce(lambda x, y: max(x, y), times_used)))
     print(max(times_used), 'is the most one pin is used')
+    print(total_dist, 'is the total distance in pixels (1000 x 1000)')
     out_img.show()
     if opts['-o']:
         out_img.save(opts['-o'])
